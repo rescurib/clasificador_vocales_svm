@@ -28,6 +28,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+// CMSIS-DSP includes
+#include <arm_math.h>
+
 // Indicates if the microphone is currently recording
 static volatile bool is_recording = false;
 // Buffer for I2S stereo samples (2 words, 16 bits each, double-buffered)
