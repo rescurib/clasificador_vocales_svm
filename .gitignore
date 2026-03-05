@@ -1,6 +1,6 @@
 # Build directories
-Debug/
-Release/
+STM32CubeIDE/Release/
+STM32CubeIDE/Debug/
 
 # Prerequisites
 *.d

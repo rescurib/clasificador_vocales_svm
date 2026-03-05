@@ -31,10 +31,16 @@
 // CMSIS-DSP includes
 #include <arm_math.h>
 
+typedef union {
+    float32_t f32;
+    uint8_t b[4];
+} float_packet_t;
+
 // Indicates if the microphone is currently recording
 static volatile bool is_recording = false;
-// Buffer for I2S stereo samples (2 words, 16 bits each, double-buffered)
-static uint16_t i2s_stereo_samples[4];
+// Buffer for I2S stereo samples (2 words for left and right channels)
+static uint8_t i2s_stereo_samples[8];
+static uint8_t sample_buff[8];
 
 // External handles for I2S and UART peripherals (defined elsewhere)
 extern I2S_HandleTypeDef hi2s2;
@@ -43,6 +49,7 @@ extern UART_HandleTypeDef huart2;
 // Internal function prototypes
 static void mic_start(void);
 static void mic_stop(void);
+static inline float32_t i2s_sample_to_float32(uint8_t* sample);
 
 /**
  * @brief  Update the status LED to indicate recording state.
@@ -92,7 +99,7 @@ static void mic_start(void)
          I know, this size argument is confusing since uint16_t* is used, 
          but the HAL API expects it this way when 24 or 32 bit data formats are used. 
         */
-        if (HAL_I2S_Receive_DMA(&hi2s2, i2s_stereo_samples, 2U) == HAL_OK)
+        if (HAL_I2S_Receive_DMA(&hi2s2, (uint16_t*)i2s_stereo_samples, 2U) == HAL_OK)
         {
            is_recording = true;
            update_status_led(is_recording);
@@ -170,13 +177,41 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
         return; // Not recording, ignore
     }
 
+
+    memcpy(sample_buff, i2s_stereo_samples, sizeof(sample_buff));
+    
+    float_packet_t left_sample;
+
+	left_sample.f32 = i2s_sample_to_float32(sample_buff);
+
     // Prepare buffer to send left channel data (low byte, middle byte, high byte, newline)
-    uint8_t send_buffer[4];
-    send_buffer[0] = (uint8_t)( (i2s_stereo_samples[0] >> 8) & 0x00FFU ); 
-    send_buffer[1] = (uint8_t)( (i2s_stereo_samples[0])      & 0x00FFU ); 
-    send_buffer[2] = (uint8_t)( (i2s_stereo_samples[1] >> 8) & 0x00FFU ); 
-    send_buffer[3] = '\n'; // Newline for framing
+    uint8_t send_buffer[5];
+
+    send_buffer[0] =  left_sample.b[0];
+    send_buffer[1] =  left_sample.b[1];
+    send_buffer[2] =  left_sample.b[2];
+    send_buffer[3] =  left_sample.b[3];
+    send_buffer[4] = '\n'; // Newline for framing
 
     // Transmit audio sample over UART (don't do this here in your actual project!)
     HAL_UART_Transmit(&huart2, send_buffer, sizeof(send_buffer), 10U);
 }
+
+
+static inline float32_t i2s_sample_to_float32(uint8_t* sample)
+{
+    int32_t reord_sample = (int32_t)( (sample[1] << 16 ) |
+                                      (sample[0] << 8  ) |
+                                      (sample[3]       )
+							        );
+
+    if (reord_sample & 0x00800000)   // if 24-bit sign bit is set
+    {
+        reord_sample |= 0xFF000000;  // sign-extend to 32 bits
+    }
+
+    // Convert 24-bit signed sample to float in range [-1.0, 1.0]
+    return (float32_t) (reord_sample / 8388608.0f); // Divide by 2^23 to normalize
+}
+
+
