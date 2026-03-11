@@ -31,6 +31,9 @@
 // CMSIS-DSP includes
 #include <arm_math.h>
 
+/******** Definiciones ******** */
+#define SAMPLES_PER_HOP 256U // 32 ms at 8 kHz
+
 typedef union {
     float32_t f32;
     uint8_t b[4];
@@ -38,9 +41,11 @@ typedef union {
 
 // Indicates if the microphone is currently recording
 static volatile bool is_recording = false;
+
 // Buffer for I2S stereo samples (2 words for left and right channels)
-static uint8_t i2s_stereo_samples[8];
-static uint8_t sample_buff[8];
+static uint8_t i2s_stereo_samples[SAMPLES_PER_HOP * 2 * 4]; // Dos canales, 4 bytes por muestra.
+static uint8_t sample_buff[SAMPLES_PER_HOP * 2 * 4]; // Buffer para un hop de muestras mono (32 ms)
+static uint8_t hop_buff[SAMPLES_PER_HOP * 4]; // Buffer para un hop de muestras mono (32 ms)
 
 // External handles for I2S and UART peripherals (defined elsewhere)
 extern I2S_HandleTypeDef hi2s2;
@@ -99,7 +104,7 @@ static void mic_start(void)
          I know, this size argument is confusing since uint16_t* is used, 
          but the HAL API expects it this way when 24 or 32 bit data formats are used. 
         */
-        if (HAL_I2S_Receive_DMA(&hi2s2, (uint16_t*)i2s_stereo_samples, 2U) == HAL_OK)
+        if (HAL_I2S_Receive_DMA(&hi2s2, (uint16_t*)i2s_stereo_samples, 2 * SAMPLES_PER_HOP) == HAL_OK)
         {
            is_recording = true;
            update_status_led(is_recording);
@@ -157,6 +162,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     }
 }
 
+/*
+HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s)
+{
+    // This callback is called when half of the DMA buffer is filled.
+    // You can use this to process the first half of the samples while the second half is being filled.
+}
+*/
+
 /**
  * @brief  I2S DMA receive complete callback.
  *         Called when a block of I2S data is received.
@@ -180,10 +193,22 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
 
     memcpy(sample_buff, i2s_stereo_samples, sizeof(sample_buff));
     
-    float_packet_t left_sample;
+    static volatile float32_t hop[SAMPLES_PER_HOP];
+    float_packet_t result;
 
-	left_sample.f32 = i2s_sample_to_float32(sample_buff);
+    for (uint32_t i = 0; i < SAMPLES_PER_HOP; i++)
+    {
+        // Convert left channel sample (first 4 bytes of each stereo pair)
+        uint8_t* sample_ptr = &sample_buff[i * 8]; // 8 bytes per stereo sample (4 for left, 4 for right)
+        hop[i] = i2s_sample_to_float32(sample_ptr);
+    }
 
+    arm_rms_f32((float32_t *)hop, SAMPLES_PER_HOP, &result.f32);
+    
+    HAL_UART_Transmit(&huart2, result.b, sizeof(result.b), 10U);
+    HAL_UART_Transmit(&huart2, (uint8_t*)"\n", 1U, 10U); // Newline for framing
+
+    /*
     // Prepare buffer to send left channel data (low byte, middle byte, high byte, newline)
     uint8_t send_buffer[5];
 
@@ -195,6 +220,7 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
 
     // Transmit audio sample over UART (don't do this here in your actual project!)
     HAL_UART_Transmit(&huart2, send_buffer, sizeof(send_buffer), 10U);
+    */
 }
 
 

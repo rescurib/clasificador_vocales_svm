@@ -1,7 +1,0 @@
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/main.c:72:5:main	1
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/main.c:120:6:SystemClock_Config	4
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/main.c:168:13:MX_I2S2_Init	2
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/main.c:202:13:MX_USART2_UART_Init	2
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/main.c:235:13:MX_DMA_Init	1
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/main.c:253:13:MX_GPIO_Init	1
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/main.c:299:6:Error_Handler	1

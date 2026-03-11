@@ -1,6 +1,0 @@
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/serial_mic_recorder.c:51:20:update_status_led	2
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/serial_mic_recorder.c:69:6:serial_recorder_loop	1
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/serial_mic_recorder.c:87:13:mic_start	3
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/serial_mic_recorder.c:117:13:mic_stop	2
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/serial_mic_recorder.c:137:6:HAL_GPIO_EXTI_Callback	3
-D://Proyectos/WakeWordSTM32/Firmware/wake_up_word_svm/Src/serial_mic_recorder.c:159:6:HAL_I2S_RxCpltCallback	3
