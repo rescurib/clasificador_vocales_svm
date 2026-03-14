@@ -27,12 +27,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 
 // CMSIS-DSP includes
 #include <arm_math.h>
 
 /******** Definiciones ******** */
 #define SAMPLES_PER_HOP 256U // 32 ms at 8 kHz
+#define FULL_BUFFER_SIZE (SAMPLES_PER_HOP * 8) // 256 ms of audio at 8 kHz
 
 typedef union {
     float32_t f32;
@@ -45,7 +47,13 @@ static volatile bool is_recording = false;
 // Buffer for I2S stereo samples (2 words for left and right channels)
 static uint8_t i2s_stereo_samples[SAMPLES_PER_HOP * 2 * 4]; // Dos canales, 4 bytes por muestra.
 static uint8_t sample_buff[SAMPLES_PER_HOP * 2 * 4]; // Buffer para un hop de muestras mono (32 ms)
-static uint8_t hop_buff[SAMPLES_PER_HOP * 4]; // Buffer para un hop de muestras mono (32 ms)
+static float32_t full_buff[FULL_BUFFER_SIZE]; // 256 ms de muestras mono a 8 kHz
+static  float32_t hop[SAMPLES_PER_HOP];
+
+// Variables globales
+float32_t g_noise_floor =  0.01f; // Valor de ruido de fondo inicial (RMS)
+bool g_signal_detected  = false; // Indica si se ha detectado una señal por encima del umbral de ruido
+bool g_dma_data_ready   = false; // Indica si la transferencia DMA ha completado
 
 // External handles for I2S and UART peripherals (defined elsewhere)
 extern I2S_HandleTypeDef hi2s2;
@@ -84,11 +92,43 @@ void serial_recorder_loop(void)
     is_recording = false;
     update_status_led(is_recording);
     memset(i2s_stereo_samples, 0, sizeof(i2s_stereo_samples));
+    uint16_t hop_index = 0;
 
     while(1)
     {
-        // Main loop does nothing; start/stop is interrupt-driven
-        HAL_Delay(1);
+        if(g_signal_detected)
+        {
+            if(g_dma_data_ready && hop_index < 8) // Solo procesar si hay datos DMA listos y no hemos llenado el buffer completo
+            {
+                memcpy(full_buff + (hop_index * SAMPLES_PER_HOP), hop, sizeof(hop));
+                hop_index++;
+                g_dma_data_ready = false; // Reset flag after processing
+            } else if (hop_index == 8)
+            {
+                hop_index = 0;
+                g_signal_detected = false;
+
+                // Enviar buffer completo de 256 ms por UART
+                HAL_UART_Transmit(&huart2, (uint8_t*)"Mic acquisition: START\r\n", 24, 100U);
+                HAL_Delay(1);
+
+                // Enviar cada muestra como 4 bytes (float32)
+                uint8_t send_buff[5];
+                for(int i = 0; i < 4*FULL_BUFFER_SIZE - 4 ; i+=4) 
+                {
+                    send_buff[0] = ((uint8_t*)full_buff)[i];
+                    send_buff[1] = ((uint8_t*)full_buff)[i+1];
+                    send_buff[2] = ((uint8_t*)full_buff)[i+2];
+                    send_buff[3] = ((uint8_t*)full_buff)[i+3];
+                    send_buff[4] = '\n';
+                    HAL_UART_Transmit(&huart2, send_buff, 5, 100U);
+                }
+
+                HAL_UART_Transmit(&huart2, (uint8_t*)"Mic acquisition: STOP\r\n", 23, 100U);
+
+            }
+            
+        }
     }
 }
 
@@ -110,8 +150,8 @@ static void mic_start(void)
            update_status_led(is_recording);
 
            // Notify host that acquisition has started
-           const char* msg = "Mic acquisition: START\r\n";
-           HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100U);
+           //const char* msg = "Mic acquisition: START\r\n";
+           //HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100U);
         } 
         else 
         {
@@ -134,10 +174,6 @@ static void mic_stop(void)
         HAL_I2S_DMAStop(&hi2s2);
         is_recording = false;
         update_status_led(is_recording);
-
-        // Notify host that acquisition has stopped
-        const char* msg = "Mic acquisition: STOP\r\n";
-        HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100U);
     }
 }
 
@@ -190,10 +226,11 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
         return; // Not recording, ignore
     }
 
-
     memcpy(sample_buff, i2s_stereo_samples, sizeof(sample_buff));
+
+    g_dma_data_ready = true; // Indica que los datos DMA están listos para ser procesados
     
-    static volatile float32_t hop[SAMPLES_PER_HOP];
+    
     float_packet_t result;
 
     for (uint32_t i = 0; i < SAMPLES_PER_HOP; i++)
@@ -204,23 +241,14 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
     }
 
     arm_rms_f32((float32_t *)hop, SAMPLES_PER_HOP, &result.f32);
-    
-    HAL_UART_Transmit(&huart2, result.b, sizeof(result.b), 10U);
-    HAL_UART_Transmit(&huart2, (uint8_t*)"\n", 1U, 10U); // Newline for framing
 
-    /*
-    // Prepare buffer to send left channel data (low byte, middle byte, high byte, newline)
-    uint8_t send_buffer[5];
-
-    send_buffer[0] =  left_sample.b[0];
-    send_buffer[1] =  left_sample.b[1];
-    send_buffer[2] =  left_sample.b[2];
-    send_buffer[3] =  left_sample.b[3];
-    send_buffer[4] = '\n'; // Newline for framing
-
-    // Transmit audio sample over UART (don't do this here in your actual project!)
-    HAL_UART_Transmit(&huart2, send_buffer, sizeof(send_buffer), 10U);
-    */
+    if(result.f32 > 6 * g_noise_floor)
+    {
+        g_signal_detected = true;
+    } else
+      {
+        g_noise_floor = result.f32; // Actualizar nivel de ruido.
+      }
 }
 
 
