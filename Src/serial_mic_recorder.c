@@ -48,7 +48,7 @@ static volatile bool is_recording = false;
 static uint8_t i2s_stereo_samples[SAMPLES_PER_HOP * 2 * 4]; // Dos canales, 4 bytes por muestra.
 static uint8_t sample_buff[SAMPLES_PER_HOP * 2 * 4]; // Buffer para un hop de muestras mono (32 ms)
 static float32_t full_buff[FULL_BUFFER_SIZE]; // 256 ms de muestras mono a 8 kHz
-static  float32_t hop[SAMPLES_PER_HOP];
+static float32_t hop[SAMPLES_PER_HOP];
 
 // Variables globales
 float32_t g_noise_floor =  0.01f; // Valor de ruido de fondo inicial (RMS)
