@@ -94,6 +94,9 @@ void serial_recorder_loop(void)
     memset(i2s_stereo_samples, 0, sizeof(i2s_stereo_samples));
     uint16_t hop_index = 0;
 
+    // Inicializar contexto MFCC
+    arm_mfcc_instance_f32 mfcc_ctx;
+
     while(1)
     {
         if(g_signal_detected)
