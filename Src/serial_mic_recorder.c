@@ -31,10 +31,15 @@
 
 // CMSIS-DSP includes
 #include <arm_math.h>
+#include "mfcc_config.h"
 
 /******** Definiciones ******** */
 #define SAMPLES_PER_HOP 256U // 32 ms at 8 kHz
 #define FULL_BUFFER_SIZE (SAMPLES_PER_HOP * 8) // 256 ms of audio at 8 kHz
+
+// Parámetros MFCC
+#define MFCC_COEFFS_NUM 13U
+#define FFT_SIZE        256U
 
 typedef union {
     float32_t f32;
@@ -96,7 +101,15 @@ void serial_recorder_loop(void)
 
     // Inicializar contexto MFCC
     arm_mfcc_instance_f32 mfcc_ctx;
-
+    arm_mfcc_init_f32(&mfcc_ctx,
+                       FFT_SIZE, 
+                       NB_MFCC_NB_FILTER_CONFIG_8K_F32, 
+                       MFCC_COEFFS_NUM, 
+                       mfcc_dct_coefs_config1_f32, 
+                       mfcc_filter_pos_config_8k_f32, 
+                       mfcc_filter_len_config_8k_f32,
+                       mfcc_filter_coefs_config_8k_f32,
+                       mfcc_window_coefs_config3_f32);
     while(1)
     {
         if(g_signal_detected)
