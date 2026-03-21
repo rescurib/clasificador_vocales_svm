@@ -106,7 +106,7 @@ void serial_recorder_loop(void)
     float32_t mfcc_output[MFCC_COEFFS_NUM]; 
 
     // Buffer temporal para datos complejos
-    float32_t mfcc_complex_buff[FFT_SIZE / 2]; 
+    float32_t mfcc_complex_buff[2 * FFT_SIZE];
 
     // Inicializar contexto MFCC
     arm_mfcc_instance_f32 mfcc_ctx;

@@ -97,8 +97,11 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.828269055" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.385462534.533469906" name="CommonTables.c" rcbsApplicability="disable" resourcePath="Drivers/CMSIS/DSP/Source/CommonTables/CommonTables.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.948684521.1460252765">
+						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.948684521.1460252765" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.948684521"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="Drivers/CMSIS/DSP/Source/TransformFunctions/TransformFunctions.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Drivers/CMSIS/DSP/Source/CommonTables/CommonTables.c|Drivers/CMSIS/DSP/Source/TransformFunctions/TransformFunctions.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
