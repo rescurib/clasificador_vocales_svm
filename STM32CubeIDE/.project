@@ -48,7 +48,7 @@
 		<link>
 			<name>Application/User/main.c</name>
 			<type>1</type>
-			<locationURI>copy_PARENT/Src/main.c</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/main.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/mfcc_config.c</name>
@@ -58,17 +58,17 @@
 		<link>
 			<name>Application/User/serial_mic_recorder.c</name>
 			<type>1</type>
-			<locationURI>copy_PARENT/Src/serial_mic_recorder.c</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/serial_mic_recorder.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/stm32f3xx_hal_msp.c</name>
 			<type>1</type>
-			<locationURI>copy_PARENT/Src/stm32f3xx_hal_msp.c</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/stm32f3xx_hal_msp.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/stm32f3xx_it.c</name>
 			<type>1</type>
-			<locationURI>copy_PARENT/Src/stm32f3xx_it.c</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/stm32f3xx_it.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/CMSIS/DSP</name>
