@@ -35,7 +35,8 @@
 
 /******** Definiciones ******** */
 #define SAMPLES_PER_HOP 256U // 32 ms at 8 kHz
-#define FULL_BUFFER_SIZE (SAMPLES_PER_HOP * 8) // 256 ms of audio at 8 kHz
+#define HOPS_PER_FRAME 8U // 256 ms total frame length at 8 kHz
+#define FULL_BUFFER_SIZE (SAMPLES_PER_HOP * HOPS_PER_FRAME) // 256 ms of audio at 8 kHz
 
 // Parámetros MFCC
 #define MFCC_COEFFS_NUM 13U
@@ -55,6 +56,9 @@ static uint8_t sample_buff[SAMPLES_PER_HOP * 2 * 4]; // Buffer para un hop de mu
 static float32_t full_buff[FULL_BUFFER_SIZE]; // 256 ms de muestras mono a 8 kHz
 static float32_t hop[SAMPLES_PER_HOP];
 
+// Matriz MFCC para frame [8 hops]
+float32_t mfcc_matrix[HOPS_PER_FRAME][MFCC_COEFFS_NUM]; 
+
 // Promedio y varianza de los coeficientes MFCC del frame actual.
 static float32_t feature_vector[2 * MFCC_COEFFS_NUM]; 
 
@@ -71,6 +75,7 @@ extern UART_HandleTypeDef huart2;
 static void mic_start(void);
 static void mic_stop(void);
 static inline float32_t i2s_sample_to_float32(uint8_t* sample);
+void mean_std_mfcc(float32_t *mfcc_matrix, uint32_t num_hops, uint32_t num_coeffs, float32_t *feature_vector);
 
 /**
  * @brief  Update the status LED to indicate recording state.
@@ -102,9 +107,6 @@ void serial_recorder_loop(void)
     memset(i2s_stereo_samples, 0, sizeof(i2s_stereo_samples));
     uint16_t hop_index = 0;
 
-    // Buffer para los coeficientes MFCC del hop.
-    float32_t mfcc_output[MFCC_COEFFS_NUM]; 
-
     // Buffer temporal para datos complejos
     float32_t mfcc_complex_buff[2 * FFT_SIZE];
 
@@ -126,11 +128,11 @@ void serial_recorder_loop(void)
             if(g_dma_data_ready && hop_index < 8) // Solo procesar si hay datos DMA listos y no hemos llenado el buffer completo
             {
                 memcpy(full_buff + (hop_index * SAMPLES_PER_HOP), hop, sizeof(hop));
-                hop_index++;
                 g_dma_data_ready = false; // Reset flag after processing
 
                 // Calcular MFCCs del hop actual
-                arm_mfcc_f32(&mfcc_ctx, hop, mfcc_output, mfcc_complex_buff);
+                arm_mfcc_f32(&mfcc_ctx, hop, mfcc_matrix[hop_index], mfcc_complex_buff);
+                hop_index++;
 
             } else if (hop_index == 8)
             {
