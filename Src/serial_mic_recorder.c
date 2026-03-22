@@ -136,6 +136,8 @@ void serial_recorder_loop(void)
 
             } else if (hop_index == 8)
             {
+                mean_std_mfcc(&mfcc_matrix[0][0], HOPS_PER_FRAME, MFCC_COEFFS_NUM, feature_vector);
+
                 hop_index = 0;
                 g_signal_detected = false;
 
@@ -299,6 +301,22 @@ static inline float32_t i2s_sample_to_float32(uint8_t* sample)
 
     // Convert 24-bit signed sample to float in range [-1.0, 1.0]
     return (float32_t) (reord_sample / 8388608.0f); // Divide by 2^23 to normalize
+}
+
+void mean_std_mfcc(float32_t *mfcc_mat, uint32_t num_hops, uint32_t num_coeffs, float32_t *feature_vector)
+{
+    float32_t col_buf[num_coeffs];
+    
+    for( uint16_t i = 0; i < num_coeffs; i++)
+    {
+        for( uint16_t j = 0; j < num_hops; j++)
+        {
+            // Extraer la columna i-ésima de la matriz MFCC
+            col_buf[j] = *(mfcc_mat + (j * num_coeffs) + i); 
+        }
+        arm_mean_f32(col_buf, num_hops, &feature_vector[i]);
+        arm_std_f32(col_buf, num_hops, &feature_vector[i + num_coeffs]);
+    }  
 }
 
 
