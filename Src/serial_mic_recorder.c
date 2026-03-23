@@ -32,6 +32,7 @@
 // CMSIS-DSP includes
 #include <arm_math.h>
 #include "mfcc_config.h"
+#include "svm_params.h"
 
 /******** Definiciones ******** */
 #define SAMPLES_PER_HOP 256U // 32 ms at 8 kHz
@@ -122,6 +123,21 @@ void serial_recorder_loop(void)
                        mfcc_filter_len_config_8k_f32,
                        mfcc_filter_coefs_config_8k_f32,
                        mfcc_window_coefs_config3_f32);
+    
+    // Inicializar SVM's 
+    // a vs resto
+    arm_svm_polynomial_instance_f32 svm_a_ctx;
+    arm_svm_polynomial_init_f32(&svm_a_ctx,
+                                NB_SV_A_VS_REST,
+                                VECTOR_DIMENSION,
+                                INTERCEPT_A_VS_REST,
+                                dualCoefficients_a_vs_rest,
+                                supportVectors_a_vs_rest,
+                                classes_a_vs_rest,
+                                1, /* degree */
+                                0.0f, /* coef0 */
+                                1.0f /* gamma */);
+
     while(1)
     {
         if(g_signal_detected)
@@ -129,7 +145,7 @@ void serial_recorder_loop(void)
             if(g_dma_data_ready && hop_index < 8) // Solo procesar si hay datos DMA listos y no hemos llenado el buffer completo
             {
                 memcpy(full_buff + (hop_index * SAMPLES_PER_HOP), hop, sizeof(hop));
-                g_dma_data_ready = false; // Reset flag after processing
+                g_dma_data_ready = false; 
 
                 // Calcular MFCCs del hop actual
                 arm_mfcc_f32(&mfcc_ctx, hop, mfcc_matrix[hop_index], mfcc_complex_buff);
@@ -138,6 +154,10 @@ void serial_recorder_loop(void)
             } else if (hop_index == 8)
             {
                 mean_std_mfcc(&mfcc_matrix[0][0], HOPS_PER_FRAME, MFCC_COEFFS_NUM, feature_vector);
+
+                // Clasificar muestra con SVM (a vs rest)
+                int32_t svm_result;
+                arm_svm_polynomial_predict_f32(&svm_a_ctx, feature_vector, &svm_result);
 
                 hop_index = 0;
                 g_signal_detected = false;
