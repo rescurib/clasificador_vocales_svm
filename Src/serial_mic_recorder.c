@@ -60,7 +60,8 @@ static float32_t hop[SAMPLES_PER_HOP];
 float32_t mfcc_matrix[HOPS_PER_FRAME][MFCC_COEFFS_NUM]; 
 
 // Promedio y varianza de los coeficientes MFCC del frame actual.
-static float32_t feature_vector[2 * MFCC_COEFFS_NUM]; 
+#define FEATURE_VECTOR_SIZE (2 * MFCC_COEFFS_NUM) // Media + varianza para cada coeficiente
+static float32_t feature_vector[FEATURE_VECTOR_SIZE]; 
 
 // Variables globales
 float32_t g_noise_floor =  0.01f; // Valor de ruido de fondo inicial (RMS)
@@ -141,26 +142,27 @@ void serial_recorder_loop(void)
                 hop_index = 0;
                 g_signal_detected = false;
 
-                /*
-                // Enviar buffer completo de 256 ms por UART
-                HAL_UART_Transmit(&huart2, (uint8_t*)"Mic acquisition: START\r\n", 24, 100U);
+                // Enviar vector de características por UART
+                HAL_UART_Transmit(&huart2, (uint8_t*)"MFCC_START\r\n", 10, 100U);
                 HAL_Delay(1);
 
-                // Enviar cada muestra como 4 bytes (float32)
+                // Enviar cada elemento como 4 bytes (float32)
                 uint8_t send_buff[5];
-                for(int i = 0; i < 4*FULL_BUFFER_SIZE - 4 ; i+=4) 
+                for(int i = 0; i < 4*FEATURE_VECTOR_SIZE; i+=4) 
                 {
-                    send_buff[0] = ((uint8_t*)full_buff)[i];
-                    send_buff[1] = ((uint8_t*)full_buff)[i+1];
-                    send_buff[2] = ((uint8_t*)full_buff)[i+2];
-                    send_buff[3] = ((uint8_t*)full_buff)[i+3];
+                    send_buff[0] = ((uint8_t*)feature_vector)[i];
+                    send_buff[1] = ((uint8_t*)feature_vector)[i+1];
+                    send_buff[2] = ((uint8_t*)feature_vector)[i+2];
+                    send_buff[3] = ((uint8_t*)feature_vector)[i+3];
                     send_buff[4] = '\n';
                     HAL_UART_Transmit(&huart2, send_buff, 5, 100U);
                 }
 
-                HAL_UART_Transmit(&huart2, (uint8_t*)"Mic acquisition: STOP\r\n", 23, 100U);
-                */
+                HAL_UART_Transmit(&huart2, (uint8_t*)"MFCC_END\r\n", 8, 100U);
 
+                // Retardo para evitar registrar ecos.
+                HAL_Delay(200);
+                g_signal_detected = false;
             }
             
         }
@@ -185,8 +187,8 @@ static void mic_start(void)
            update_status_led(is_recording);
 
            // Notify host that acquisition has started
-           //const char* msg = "Mic acquisition: START\r\n";
-           //HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100U);
+           const char* msg = "Mic acquisition: START\r\n";
+           HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100U);
         } 
         else 
         {
@@ -209,6 +211,10 @@ static void mic_stop(void)
         HAL_I2S_DMAStop(&hi2s2);
         is_recording = false;
         update_status_led(is_recording);
+
+        // Notify host that acquisition has stopped
+        const char* msg = "Mic acquisition: STOP\r\n";
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100U);
     }
 }
 
@@ -277,7 +283,7 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
 
     arm_rms_f32((float32_t *)hop, SAMPLES_PER_HOP, &result.f32);
 
-    if(result.f32 > 6 * g_noise_floor)
+    if(result.f32 > 10 * g_noise_floor)
     {
         g_signal_detected = true;
     } else
