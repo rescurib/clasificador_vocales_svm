@@ -108,7 +108,7 @@ def export_h_file(ovr_clf, label_to_int, n_features, output_path="svm_params.h")
         lines.append(format_float_array(w, f"supportVectors_{suffix}"))
         lines.append("")
         lines.append("/* Class IDs: [target class, rest sentinel] */")
-        lines.append(format_int_array([id_k, -1], f"classes_{suffix}"))
+        lines.append(format_int_array([-1, id_k], f"classes_{suffix}"))
         lines.append("")
 
     lines.append(f"#endif /* {guard} */")
@@ -165,7 +165,7 @@ def main():
     print("Model saved to: svm_mfcc_model.joblib")
 
     n_features = X_combined.shape[1]
-    print(f"\n{len(unique_labels)} classes → {len(unique_labels)} OvR binary classifiers to export")
+    print(f"\n{len(unique_labels)} classes -> {len(unique_labels)} OvR binary classifiers to export")
     export_h_file(ovr_clf, label_to_int, n_features, output_path="svm_params.h")
 
 
