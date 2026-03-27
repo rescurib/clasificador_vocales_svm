@@ -22,7 +22,6 @@ STM32CubeIDE/Debug/
 
 # Libraries
 *.lib
-*.a
 *.la
 *.lo
 
