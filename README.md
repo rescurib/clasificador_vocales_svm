@@ -1,4 +1,4 @@
-# Sistema de Detección de Vocales
+# Clasificador de Vocales con SVM´s
 
 Este proyecto implementa un clasificador SVM para la detección de vocales utilizando un microcontrolador STM32F3. El sistema adquiere audio mediante un micrófono MEMS INMP441, extrae características MFCC y clasifica la vocal utilizando Máquinas de Vectores de Soporte (SVM).
 
@@ -20,7 +20,7 @@ Este proyecto implementa un clasificador SVM para la detección de vocales utili
 ## Estructura del Proyecto
 
 ```
-wake_up_word_svm/
+clasificador_vocales_svm/
 ├── Inc/                      # Cabeceras de la aplicación
 │   ├── app.h                 # Cabecera principal de la aplicación
 │   ├── clasificador_svm.h    # Definiciones del clasificador SVM
