@@ -34,4 +34,8 @@ Para constatar la calidad de nuestro dataset o audios recuperados, puedes ejecut
 ```bash
 python plot_mfcc_pca.py
 ```
-El script leerá los archivos en el mismo formato, los estandarizará, y aplicará Análisis de Componentes Principales (PCA) para comprimir la dimensionalidad geométrica y mostrarte una figura en 2D. Con esto, confirmarás visualmente si las vocales capturadas logran agruparse (ser separables) en el espectro MFCC.
+El script leerá los archivos en el mismo formato, los estandarizará, y aplicará Análisis de Componentes Principales (PCA) para comprimir la dimensionalidad geométrica y mostrarte una figura en 2D. Con esto, confirmarás visualmente si las vocales capturadas logran agruparse (ser separables) en el espectro MFCC:
+
+<p align="center">
+<img src="https://drive.google.com/uc?export=view&id=1SPOT91A9TNcxonFPD9OUkRUxNS6wCCrs" width="500">
+<p>
