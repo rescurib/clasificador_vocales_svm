@@ -102,3 +102,9 @@ sudo picocom -b 460800 /dev/ttyACM0
 - Las interrupciones de GPIO y I2S manejan la adquisición de datos y el control del sistema.
 - Se utiliza la biblioteca CMSIS-DSP para el procesamiento eficiente de señales.
 
+## Mediciones
+
+| Función | Tiempo de ejecución |
+|---------|-------------|
+| `mfcc_features_compute` | 1400 µs |
+| `clasificador_svm_predict` | 130 - 160 µs |
