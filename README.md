@@ -70,6 +70,27 @@ El sistema está configurado para una frecuencia de muestreo de **8 kHz**.
    ```
    Donde `X` es el número de la vocal detectada.
 
+### Monitorización Serial (UART)
+Para visualizar los escaneos y resultados emitidos por el microcontrolador, debes configurar correctamente tu terminal serial. El sistema opera a una velocidad muy alta para transferir los vectores flotantes a tiempo. El puerto debe estar ajustado concretamente a un **Baudrate de 460800 bps** (8 bits de datos, sin paridad, 1 bit de parada).
+
+#### En Windows
+Puedes usar los siguientes programas con interfaz gráfica comúnmente recomendados:
+- **PuTTY**: En *Connection type* selecciona `Serial`. En *Serial line* especifica tu puerto (ej. `COM3`) y cambia el *Speed* (baudrate) a `460800`.
+- **Tera Term** o **RealTerm**: Asegúrate de seleccionar el número de puerto COM correspondiente e ir a la configuración Serial Port para asignar la misma tasa de audios (460800).
+
+#### En Linux
+En distribuciones robustas como Ubuntu/Debian, el puerto de tu placa frecuentemente se instanciará sobre `/dev/ttyACM0` (o `ttyUSB0`). Puedes valerte de utilidades de terminal como `screen` o `picocom`.
+
+Ejemplo con `screen`:
+```bash
+sudo screen /dev/ttyACM0 460800
+```
+*(Para salir de la interfaz screen presiona `Ctrl+A` seguido de `K`)*
+
+Opcionalmente, usando el robusto y ligero `picocom`:
+```bash
+sudo picocom -b 460800 /dev/ttyACM0
+```
 
 ## Notas de Implementación
 
