@@ -59,7 +59,7 @@ El sistema está configurado para una frecuencia de muestreo de **8 kHz**.
 - **Número de coeficientes MFCC**: 13
 
 ### Parámetros de Detección
-- **Umbral de detección de señal**: 0.01 (RMS)
+- **Umbral de detección de señal**: 7.5 X nivel de ruido (RMS)
 - **Filtro de ruido**: Suavizado exponencial con alpha = 0.01
 
 ## Uso
