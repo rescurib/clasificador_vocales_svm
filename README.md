@@ -1,4 +1,4 @@
-# Sistema de Detección de Palabras de Activación
+# Sistema de Detección de Vocales
 
 Este proyecto implementa un clasificador SVM para la detección de vocales utilizando un microcontrolador STM32F3. El sistema adquiere audio mediante un micrófono MEMS INMP441, extrae características MFCC y clasifica la vocal utilizando Máquinas de Vectores de Soporte (SVM).
 
@@ -11,7 +11,7 @@ Este proyecto implementa un clasificador SVM para la detección de vocales utili
   - Ventanas de 256 ms (8 hops).
   - Cálculo de medias y desviaciones estándar de los coeficientes MFCC.
 - **Clasificación**:
-  - Implementación de múltiples clasificadores SVM "uno contra el resto".
+  - Implementación de múltiples clasificadores SVM "uno contra el resto" usando la librería CMSIS-DSP.
 - **Interfaz de Usuario**:
   - Botón de usuario (B1) para iniciar/detener la grabación.
   - LED de estado que indica el estado de la grabación.
@@ -42,6 +42,10 @@ wake_up_word_svm/
 - Micrófono MEMS INMP441
 - LED de estado (LD2)
 - Botón de usuario (B1)
+
+<p align="center">
+<img src="https://drive.google.com/uc?export=view&id=1k-mYVQVk2T5NjttuTqAW95a4pcD9Cpar" width="500">
+<p>
 
 ## Configuración
 
