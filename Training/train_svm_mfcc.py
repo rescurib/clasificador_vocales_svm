@@ -17,8 +17,6 @@ from sklearn.svm import LinearSVC
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
-import joblib
-
 
 def format_float_array(arr, name, indent=2):
     """Formatea un array de numpy como un literal de array float32_t de C."""
@@ -160,9 +158,6 @@ def main():
     y_pred = ovr_clf.predict(X_test)
     print(f"Test accuracy: {accuracy_score(y_test, y_pred):.4f}")
     print(classification_report(y_test, y_pred))
-
-    joblib.dump(ovr_clf, "svm_mfcc_model.joblib")
-    print("Model saved to: svm_mfcc_model.joblib")
 
     n_features = X_combined.shape[1]
     print(f"\n{len(unique_labels)} classes -> {len(unique_labels)} OvR binary classifiers to export")
