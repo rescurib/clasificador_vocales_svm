@@ -173,8 +173,8 @@ static void mic_start(void)
         else 
         {
            // Notificar error
-           const char* msg = "Mic acquisition: START ERROR\r\n";
-           HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100U);
+           const char* error_msg = "Error en adquisicion\r\n";
+           HAL_UART_Transmit(&huart2, (uint8_t*)error_msg, strlen(error_msg), 100U);
         }
     } 
 }
@@ -259,7 +259,7 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
         g_signal_detected = true;
     } else
     {
-        // Actualizar nivel de ruido.
+        // Actualizar nivel de ruido con filtro de suivizado.
         g_noise_floor = (1.0f - NOISE_ALPHA) * g_noise_floor +
                     NOISE_ALPHA * result.f32;
     }
