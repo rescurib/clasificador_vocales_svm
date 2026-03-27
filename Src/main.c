@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "serial_mic_recorder.h"
+#include "app.h"
 
 /* USER CODE END Includes */
 
@@ -108,7 +108,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    serial_recorder_loop();
+    app_run();
   }
   /* USER CODE END 3 */
 }

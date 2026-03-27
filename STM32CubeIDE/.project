@@ -46,6 +46,16 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Src/system_stm32f3xx.c</locationURI>
 		</link>
 		<link>
+			<name>Application/User/app.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/app.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/clasificador_svm.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/clasificador_svm.c</locationURI>
+		</link>
+		<link>
 			<name>Application/User/main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Src/main.c</locationURI>
@@ -56,9 +66,9 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Src/mfcc_config.c</locationURI>
 		</link>
 		<link>
-			<name>Application/User/serial_mic_recorder.c</name>
+			<name>Application/User/mfcc_features.c</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Src/serial_mic_recorder.c</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/mfcc_features.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/stm32f3xx_hal_msp.c</name>
