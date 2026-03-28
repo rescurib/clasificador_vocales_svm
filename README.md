@@ -108,3 +108,9 @@ sudo picocom -b 460800 /dev/ttyACM0
 |---------|-------------|
 | `mfcc_features_compute` | 1400 µs |
 | `clasificador_svm_predict` | 130 - 160 µs |
+
+## Referencias
+* [MFCC´s](https://turing.iimas.unam.mx/~ivanvladimir/posts/mfcc/), Ivan Meza Ruiz
+* [Intuitive understanding of MFCCs](https://medium.com/@derutycsl/intuitive-understanding-of-mfccs-836d36a1f779), Emmanuel Deruty
+* [Mel-Frequency Cepstral Coefficients Explained Easily](https://www.youtube.com/watch?v=4_SH2nfbQZ8), Valerio Velardo
+* [Mel Frequency Cepstral Coefficient and its Applications: A Review](https://ieeexplore.ieee.org/document/9955539), IEEE, Open Access
