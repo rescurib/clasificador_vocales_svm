@@ -67,8 +67,8 @@ static float32_t feature_vector[FEATURE_VECTOR_SIZE];
 
 // Variables globales
 float32_t g_noise_floor =  0.01f; /**< @brief Valor inicial del ruido de fondo (RMS) */
-bool g_signal_detected  = false;  /**< @brief Indica si se ha detectado una señal por encima del umbral de ruido */
-bool g_dma_data_ready   = false;  /**< @brief Indica si la transferencia DMA se ha completado */
+volatile bool g_signal_detected  = false;  /**< @brief Indica si se ha detectado una señal por encima del umbral de ruido */
+volatile bool g_dma_data_ready   = false;  /**< @brief Indica si la transferencia DMA se ha completado */
 
 // Manejadores externos para I2S y UART (definidos en otra parte)
 extern I2S_HandleTypeDef hi2s2;
